@@ -5,7 +5,7 @@ import {
   it,
 } from "https://deno.land/std@0.182.0/testing/bdd.ts";
 
-import InputEncoder from "/src/inputEncoder.ts";
+import InputEncoder from "src/inputEncoder.ts";
 
 describe("Input encoder", () => {
   let inputEncoder: InputEncoder;
