@@ -14,8 +14,10 @@ class InputEncoder {
     const tokens = input.split(" ");
     output.push(this.textEncoder.encode(`*${tokens.length}\r\n`));
     for (const el of tokens) {
-      output.push(this.textEncoder.encode(`$${el.length}\r\n`));
-      output.push(this.textEncoder.encode(`${el}\r\n`));
+      const encoded = this.textEncoder.encode(el);
+      output.push(this.textEncoder.encode(`$${encoded.length}\r\n`));
+      output.push(encoded);
+      output.push(this.textEncoder.encode("\r\n"));
     }
     return output;
   }
