@@ -1,18 +1,10 @@
 import { assertEquals } from "https://deno.land/std@0.182.0/testing/asserts.ts";
-import {
-  beforeAll,
-  describe,
-  it,
-} from "https://deno.land/std@0.182.0/testing/bdd.ts";
+import { describe, it } from "https://deno.land/std@0.182.0/testing/bdd.ts";
 
 import InputEncoder from "src/inputEncoder.ts";
 
 describe("Input encoder", () => {
-  let inputEncoder: InputEncoder;
-
-  beforeAll(() => {
-    inputEncoder = new InputEncoder();
-  });
+  const inputEncoder = new InputEncoder();
 
   it("should return an empty array for an empty string", () => {
     const encoded = inputEncoder.encode("");
