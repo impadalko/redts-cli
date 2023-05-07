@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 import { describe, it } from "https://deno.land/std@0.182.0/testing/bdd.ts";
 
-import ConnectionUtil from "src/connectionUtil.ts";
+import { getConnectionPrefix } from "src/connectionUtil.ts";
 import TestConn from "./testConn.ts";
 
 function getRandomString(): string {
@@ -13,13 +13,11 @@ function getRandomInt(): number {
 }
 
 describe("Connection Util", () => {
-  const connectionUtil = new ConnectionUtil();
-
   it("should return the connection path for UnixAddr", () => {
     const path = getRandomString();
     const connection = new TestConn({ transport: "unix", path });
 
-    const prefix = connectionUtil.getConnectionPrefix(connection);
+    const prefix = getConnectionPrefix(connection);
 
     assertEquals(prefix, `${path}>`);
   });
@@ -29,7 +27,7 @@ describe("Connection Util", () => {
     const port = getRandomInt();
     const connection = new TestConn({ transport: "tcp", hostname, port });
 
-    const prefix = connectionUtil.getConnectionPrefix(connection);
+    const prefix = getConnectionPrefix(connection);
 
     assertEquals(prefix, `${hostname}:${port}>`);
   });
