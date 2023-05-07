@@ -1,5 +1,8 @@
 {
   "imports": {
     "src/": "./src/"
+  },
+  "tasks": {
+    "coverage": "deno test --coverage=avs && deno coverage avs --exclude=test/ && rm -rf avs"
   }
 }
