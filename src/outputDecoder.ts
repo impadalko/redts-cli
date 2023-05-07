@@ -1,21 +1,19 @@
-import Uint8ArrayUtil from "./uint8ArrayUtil.ts";
+import * as Uint8ArrayUtil from "./uint8ArrayUtil.ts";
 
 type ParsedOutput = (string | ParsedOutput)[];
 
 class OutputDecoder {
   textDecoder: TextDecoder;
-  uint8ArrayUtil: Uint8ArrayUtil;
   separator = new Uint8Array([13, 10]); // \r\n
 
   constructor() {
     this.textDecoder = new TextDecoder();
-    this.uint8ArrayUtil = new Uint8ArrayUtil();
   }
 
   decode(input: Uint8Array[]): string {
-    const mergedInput = this.uint8ArrayUtil.merge(input);
-    const trimmedInput = this.uint8ArrayUtil.trim(mergedInput);
-    const tokens = this.uint8ArrayUtil.split(trimmedInput, this.separator);
+    const mergedInput = Uint8ArrayUtil.merge(input);
+    const trimmedInput = Uint8ArrayUtil.trim(mergedInput);
+    const tokens = Uint8ArrayUtil.split(trimmedInput, this.separator);
 
     const [parsed, _] = this.#parse(tokens);
     return this.#format(parsed);
@@ -62,7 +60,7 @@ class OutputDecoder {
           let s = tokens[++i];
           // This is to cover the edge case where \r\n is part of the string.
           while (s.length < listSize) {
-            s = this.uint8ArrayUtil.merge([s, this.separator, tokens[++i]]);
+            s = Uint8ArrayUtil.merge([s, this.separator, tokens[++i]]);
           }
           output.push(this.textDecoder.decode(s));
           i++;
