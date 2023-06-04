@@ -7,11 +7,11 @@ on:
 
 jobs:
   build:
-    name: Basic Checks
+    name: Lint, format and unit test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Initialize submodules
         uses: denoland/setup-deno@v1
         with:
@@ -19,6 +19,30 @@ jobs:
       - name: Lint
         run: deno lint
       - name: Format
-        run: deno fmt
+        run: deno fmt --check
       - name: Test
-        run: deno test
+        run: deno task unit-test
+
+  integration-test:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Initialize submodules
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Integration test
+        run: deno task integration-test

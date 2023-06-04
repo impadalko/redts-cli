@@ -4,7 +4,9 @@
   },
   "tasks": {
     "compile": "deno compile --output redts-cli --allow-net src/main.ts",
-    "coverage": "deno test --coverage=avs && deno coverage avs --exclude=test/ && rm -rf avs",
-    "run": "deno run --allow-net --check=all src/main.ts"
+    "coverage": "deno task unit-test --coverage=avs && deno coverage avs --exclude=test/ && rm -rf avs",
+    "run": "deno run --allow-net --check=all src/main.ts",
+    "unit-test": "deno test --ignore=test/integration.test.ts",
+    "integration-test": "deno test test/integration.test.ts --allow-net"
   }
 }
