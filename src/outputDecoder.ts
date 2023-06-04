@@ -56,13 +56,17 @@ class OutputDecoder {
           break;
         }
         case 36: { // $, bulk string
-          const listSize = Number(this.#decodePayload(payload));
-          let s = tokens[++i];
-          // This is to cover the edge case where \r\n is part of the string.
-          while (s.length < listSize) {
-            s = Uint8ArrayUtil.merge([s, this.separator, tokens[++i]]);
+          const stringSize = Number(this.#decodePayload(payload));
+          if (stringSize === -1) {
+            output.push("(nil)");
+          } else {
+            let s = tokens[++i];
+            // This is to cover the edge case where \r\n is part of the string.
+            while (s.length < stringSize) {
+              s = Uint8ArrayUtil.merge([s, this.separator, tokens[++i]]);
+            }
+            output.push(this.textDecoder.decode(s));
           }
-          output.push(this.textDecoder.decode(s));
           i++;
           break;
         }

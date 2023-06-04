@@ -25,6 +25,14 @@ describe("Output decoder", () => {
     assertEquals(decoded, "(error) Error");
   });
 
+  it("should decode a null string correctly", () => {
+    const decoded = outputDecoder.decode([
+      textEncoder.encode("$-1\r\n"),
+    ]);
+
+    assertEquals(decoded, "(nil)");
+  });
+
   it("should decode a bulk string correctly", () => {
     const decoded = outputDecoder.decode([
       textEncoder.encode("$10\r\nBulkString\r\n"),
