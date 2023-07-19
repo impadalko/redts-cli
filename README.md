@@ -16,16 +16,23 @@ the `-p` flag.
 
 ### Testing
 
-To run all the tests:
+To run all the unit tests:
 
 ```
-deno test
+deno task unit-test
 ```
 
 It's also possible to check code coverage by running:
 
 ```
 deno task coverage
+```
+
+To run all integration tests (please ensure there is a redis server listening on
+`localhost:6379` before running):
+
+```
+deno task integration-test
 ```
 
 ## Compiling
