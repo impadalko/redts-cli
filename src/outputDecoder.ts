@@ -1,6 +1,6 @@
 import * as Uint8ArrayUtil from "./uint8ArrayUtil.ts";
-
-type ParsedOutput = (string | ParsedOutput)[];
+import { format } from "./format.ts";
+import { ParsedOutput } from "./types.ts";
 
 class OutputDecoder {
   textDecoder: TextDecoder;
@@ -16,7 +16,7 @@ class OutputDecoder {
     const tokens = Uint8ArrayUtil.split(trimmedInput, this.separator);
 
     const [parsed, _] = this.#parse(tokens);
-    return this.#format(parsed);
+    return format(parsed);
   }
 
   #parse(
@@ -29,83 +29,91 @@ class OutputDecoder {
     let parsed = 0;
     while (i < tokens.length && parsed < max) {
       const [dataTypeChar, ...payload] = tokens[i];
+      let parsedPayload: ParsedOutput | string;
+      let nextIndex: number;
       switch (dataTypeChar) {
         case 58: { // :, integer
-          output.push(`(integer) ${this.#decodePayload(payload)}`);
-          i++;
+          [parsedPayload, nextIndex] = this.#parseInteger(payload, i);
           break;
         }
         case 45: { // -, error
-          output.push(`(error) ${this.#decodePayload(payload)}`);
-          i++;
+          [parsedPayload, nextIndex] = this.#parseError(payload, i);
           break;
         }
         case 42: { // *, array
-          const arraySize = Number(this.#decodePayload(payload));
-          if (arraySize === -1) {
-            output.push("(nil)");
-            i++;
-          } else if (arraySize === 0) {
-            output.push("(empty array)");
-            i++;
-          } else {
-            const [array, nextIndex] = this.#parse(tokens, ++i, arraySize);
-            output.push(array);
-            i = nextIndex;
-          }
+          [parsedPayload, nextIndex] = this.#parseArray(payload, tokens, i);
           break;
         }
         case 36: { // $, bulk string
-          const stringSize = Number(this.#decodePayload(payload));
-          if (stringSize === -1) {
-            output.push("(nil)");
-          } else {
-            let s = tokens[++i];
-            // This is to cover the edge case where \r\n is part of the string.
-            while (s.length < stringSize) {
-              s = Uint8ArrayUtil.merge([s, this.separator, tokens[++i]]);
-            }
-            output.push(this.textDecoder.decode(s));
-          }
-          i++;
+          [parsedPayload, nextIndex] = this.#parseBulkString(
+            payload,
+            tokens,
+            i,
+          );
           break;
         }
         case 43: // +, simple string
         default: { // All known cases are covered, default only for undocumented behavior
-          output.push(this.#decodePayload(payload));
-          i++;
+          [parsedPayload, nextIndex] = this.#parseString(payload, i);
           break;
         }
       }
+      output.push(parsedPayload);
+      i = nextIndex;
       parsed++;
     }
     return [output, i];
   }
 
-  #decodePayload(payload: number[]): string {
-    return this.textDecoder.decode(new Uint8Array(payload));
+  #parseInteger(payload: number[], index: number): [string, number] {
+    return [`(integer) ${this.#decodePayload(payload)}`, index + 1];
   }
 
-  #format(parsed: ParsedOutput, depth = 0): string {
-    // At the top level of the data structure, an array is not a true array but actually multiple
-    // returned values when commands are pipelined.
-    if (depth === 0) {
-      return parsed.reduce((acc: string[], token) => {
-        if (typeof token === "string") return acc.concat(token);
-        return acc.concat(this.#format(token, depth + 1));
-      }, []).join("\n\n");
+  #parseError(payload: number[], index: number): [string, number] {
+    return [`(error) ${this.#decodePayload(payload)}`, index + 1];
+  }
+
+  #parseArray(
+    payload: number[],
+    tokens: Uint8Array[],
+    index: number,
+  ): [ParsedOutput | string, number] {
+    const arraySize = Number(this.#decodePayload(payload));
+    if (arraySize === -1) {
+      return ["(nil)", index + 1];
     }
 
-    const indent = "  ".repeat(depth - 1);
-    return parsed.reduce((acc: string[], token, index) => {
-      if (typeof token === "string") {
-        return acc.concat([`${indent}${index + 1}) ${token}`]);
-      }
-      return acc.concat(
-        `${indent}${index + 1})`,
-        this.#format(token, depth + 1),
-      );
-    }, []).join("\n");
+    if (arraySize === 0) {
+      return ["(empty array)", index + 1];
+    }
+
+    return this.#parse(tokens, ++index, arraySize);
+  }
+
+  #parseBulkString(
+    payload: number[],
+    tokens: Uint8Array[],
+    index: number,
+  ): [string, number] {
+    const stringSize = Number(this.#decodePayload(payload));
+    if (stringSize === -1) {
+      return ["(nil)", index + 1];
+    }
+
+    let s = tokens[++index];
+    // This is to cover the edge case where \r\n is part of the string.
+    while (s.length < stringSize) {
+      s = Uint8ArrayUtil.merge([s, this.separator, tokens[++index]]);
+    }
+    return [this.textDecoder.decode(s), index + 1];
+  }
+
+  #parseString(payload: number[], index: number): [string, number] {
+    return [this.#decodePayload(payload), index + 1];
+  }
+
+  #decodePayload(payload: number[]): string {
+    return this.textDecoder.decode(new Uint8Array(payload));
   }
 }
 
