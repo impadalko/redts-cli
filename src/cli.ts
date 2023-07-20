@@ -7,7 +7,7 @@ const version = "1.0.0";
 
 function printHelp(): void {
   printVersion();
-  console.log("Stars interactive session with a redis-server.");
+  console.log("Starts interactive session with a redis-server.");
   console.log("");
   console.log(`Usage: ${name} [OPTIONS]`);
   console.log("  -h <hostname>      Server hostname (default: 127.0.0.1).");
