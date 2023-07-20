@@ -1,4 +1,5 @@
-import * as Uint8ArrayUtil from "./uint8ArrayUtil.ts";
+import * as Uint8ArrayUtil from "https://raw.githubusercontent.com/impadalko/redts-shared/main/src/uint8ArrayUtil.ts";
+
 import { format } from "./format.ts";
 import { ParsedOutput } from "./types.ts";
 
