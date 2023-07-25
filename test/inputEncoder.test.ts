@@ -15,23 +15,37 @@ describe("Input encoder", () => {
   it("should return an array with one element for a string with one word", () => {
     const encoded = inputEncoder.encode("PING");
     assertEquals(encoded, [
-      new Uint8Array([42, 49, 13, 10]),
-      new Uint8Array([36, 52, 13, 10]),
-      new Uint8Array([80, 73, 78, 71]),
-      new Uint8Array([13, 10]),
+      new Uint8Array([42, 49, 13, 10, 36, 52, 13, 10, 80, 73, 78, 71, 13, 10]),
     ]);
   });
 
   it("should return an array with two elements for a string with two words", () => {
     const encoded = inputEncoder.encode("GET key");
     assertEquals(encoded, [
-      new Uint8Array([42, 50, 13, 10]),
-      new Uint8Array([36, 51, 13, 10]),
-      new Uint8Array([71, 69, 84]),
-      new Uint8Array([13, 10]),
-      new Uint8Array([36, 51, 13, 10]),
-      new Uint8Array([107, 101, 121]),
-      new Uint8Array([13, 10]),
+      new Uint8Array([
+        42,
+        50,
+        13,
+        10,
+        36,
+        51,
+        13,
+        10,
+        71,
+        69,
+        84,
+        13,
+        10,
+        36,
+        51,
+        13,
+        10,
+        107,
+        101,
+        121,
+        13,
+        10,
+      ]),
     ]);
   });
 });

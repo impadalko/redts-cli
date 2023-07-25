@@ -10,16 +10,13 @@ class InputEncoder {
       return [this.textEncoder.encode(`*0\r\n`)];
     }
 
-    const output: Uint8Array[] = [];
     const tokens = input.split(" ");
-    output.push(this.textEncoder.encode(`*${tokens.length}\r\n`));
+    let output = `*${tokens.length}\r\n`;
     for (const el of tokens) {
-      const encoded = this.textEncoder.encode(el);
-      output.push(this.textEncoder.encode(`$${encoded.length}\r\n`));
-      output.push(encoded);
-      output.push(this.textEncoder.encode("\r\n"));
+      const encodedLength = this.textEncoder.encode(el).length;
+      output += `$${encodedLength}\r\n${el}\r\n`;
     }
-    return output;
+    return [this.textEncoder.encode(output)];
   }
 }
 
